@@ -1,2 +1,8 @@
-bindkey = [l] CMD_MOVE_RIGHT
-bindkey = [h] CMD_MOVE_LEFT
+bindkey = [] CMD_MOVE_LEFT
+bindkey = [d] CMD_MOVE_RIGHT
+bindkey = [e] CMD_MOVE_UP
+bindkey = [s] CMD_MOVE_DOWN
+
+
+
+
