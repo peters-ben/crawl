@@ -28,6 +28,7 @@ void show_stash_search_help();
 void show_skill_menu_help();
 void show_spell_library_help();
 
+bool settings_yes_or_no(PRINTF(0, ));
 void show_help(int section = CK_HOME, string highlight_string = "");
 
 void show_settings(int section = CK_HOME, string highlight_string = "");

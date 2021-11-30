@@ -6,13 +6,13 @@
 #include "AppHdr.h"
 
 #include "command.h"
-
+#include <fstream>
 #include <cctype>
 #include <cinttypes>
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-
+#include "options.h"
 #include "chardump.h"
 #include "database.h"
 #include "describe.h"
@@ -1290,51 +1290,8 @@ static void _add_formatted_settings_menu(column_composer& cols)
 	cols.add_formatted(
 		0,
 		"<h>Dungeon Crawl Settings!\n"
-		"\nSheeeeeeeeeeeeeeeeeeesh"
-		/*"Press one of the following keys to\n"
-		"obtain more information on a certain\n"
-		"aspect of Dungeon Crawl.\n"
-
-		"<w>?</w>: List of commands\n"
-		"<w>^</w>: Quickstart Guide\n"
-		"<w>:</w>: Browse character notes\n"
-		"<w>#</w>: Browse character dump\n"
-		"<w>~</w>: Macros help\n"
-		"<w>&</w>: Options help\n"
-		"<w>%</w>: Table of aptitudes\n"
-		"<w>/</w>: Lookup description\n"
-		"<w>Q</w>: FAQ\n"
-#ifdef USE_TILE_LOCAL
-		"<w>T</w>: Tiles key help\n"
-#endif
-		"<w>V</w>: Version information\n"
-		"<w>Home</w>: This screen\n");
-
-	// TODO: generate this from the manual somehow
-	cols.add_formatted(
-		1,
-		"<h>Manual Contents\n\n"
-		"<w>*</w>       Table of contents\n"
-		"<w>A</w>.      Overview\n"
-		"<w>B</w>.      Starting Screen\n"
-		"<w>C</w>.      Attributes and Stats\n"
-		"<w>D</w>.      Exploring the Dungeon\n"
-		"<w>E</w>.      Experience and Skills\n"
-		"<w>F</w>.      Monsters\n"
-		"<w>G</w>.      Items\n"
-		"<w>H</w>.      Spellcasting\n"
-		"<w>I</w>.      Targeting\n"
-		"<w>J</w>.      Religion\n"
-		"<w>K</w>.      Mutations\n"
-		"<w>L</w>.      Licence, Contact, History\n"
-		"<w>M</w>.      Macros, Options, Performance\n"
-		"<w>N</w>.      Philosophy\n"
-		"<w>1</w>.      List of Character Species\n"
-		"<w>2</w>.      List of Character Backgrounds\n"
-		"<w>3</w>.      List of Skills\n"
-		"<w>4</w>.      List of Keys and Commands\n"
-		"<w>5</w>.      Inscriptions\n"
-		"<w>6</w>.      Dungeon sprint modes\n"*/);
+		"\nPress Y to rebind MOVE LEFT"
+		"\nPress Z to rebind MOVE RIGHT");
 }
 
 static void _add_formatted_keysettings(column_composer& cols)
@@ -1769,7 +1726,7 @@ static int _get_settings_section(int section, formatted_string& header_out, form
 	static map<int, string> headers = {
 		{'*', "Manual"}, {'%', "Aptitudes"}, {'^', "Quickstart"},
 		{'~', "Macros"}, {'&', "Options"}, {'t', "Tiles"},
-		{'?', "Key help"}
+		{'?', "Key help"}, {'Y', "MAP UP"}, {'Z', "MAP DOWN"}
 	};
 
 	if (!page_text.size())
@@ -1853,7 +1810,7 @@ private:
 		formatted_string header_text, settings_text;
 		switch (key)
 		{
-		case CK_ESCAPE: case ':': case '#': case '/': case 'q': case 'v':
+		case CK_ESCAPE: case 'y': case 'z': case ':': case '#': case '/': case 'q': case 'v':
 			return false;
 		default:
 			if (!(page = _get_settings_section(key, header_text, settings_text, scroll)))
@@ -1878,6 +1835,28 @@ static bool _show_settings_special(int key)
 {
 	switch (key)
 	{
+	case 'y': {
+                std::ofstream input("/u/zon-d2/ugrad/bspe227/crawl/crawl-ref/settings/settings_command_keys.txt");
+                if(!input)
+                        std::cerr << "Could not open file!" << std::endl;
+                else {
+                        input << "bindkey = [h] CMD_MOVE_RIGHT" << std::endl;
+			input << "bindkey = [l] CMD_MOVE_LEFT" << std::endl;
+                        input.close();
+                }
+                return true;
+                  }
+	case 'z': {
+		std::ofstream input("/u/zon-d2/ugrad/bspe227/crawl/crawl-ref/settings/settings_command_keys.txt");
+		if(!input)
+			std::cerr << "Could not open file!" << std::endl;
+		else {
+			input << "bindkey = [l] CMD_MOVE_RIGHT" << std::endl;
+			input << "bindkey = [h] CMD_MOVE_LEFT" << std::endl;
+			input.close();
+		}
+		return true;
+		  }
 	case ':':
 		// If the game has begun, show notes.
 		if (crawl_state.need_save)
@@ -1912,4 +1891,24 @@ void show_settings(int section, string highlight_string) {
 	// handle the case where one of the special case help sections is triggered
 	// from the help main menu.
 	_show_settings_special(key);
+}
+
+
+bool settings_yes_or_no(const char* fmt, ...)
+{
+    
+    char buf[200];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof buf, fmt, args);
+    va_end(args);
+    buf[sizeof(buf)-1] = 0;
+    mprf(MSGCH_PROMPT, "%s (Confirm with \"yes\".) ", buf);
+
+    if (cancellable_get_line(buf, sizeof buf))
+        return false;
+    if (strcasecmp(buf, "yes") != 0)
+        return false;
+
+    return true;
 }
