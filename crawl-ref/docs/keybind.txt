@@ -9,8 +9,8 @@ Movement
 Moving one grid into a given direction:
 b         CMD_MOVE_DOWN_LEFT
 h         CMD_MOVE_LEFT
-j         CMD_MOVE_DOWN
-k         CMD_MOVE_UP
+k         CMD_MOVE_DOWN
+j         CMD_MOVE_UP
 l         CMD_MOVE_RIGHT
 n         CMD_MOVE_DOWN_RIGHT
 u         CMD_MOVE_UP_RIGHT
