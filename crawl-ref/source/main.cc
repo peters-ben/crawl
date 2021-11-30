@@ -2018,6 +2018,11 @@ void process_command(command_type cmd, command_type prev_cmd)
 #endif
 
         // Movement and running commands.
+    case CMD_SETTINGS_MENU: 
+	show_settings();
+	redraw_screen();
+        update_screen();
+	break;
     case CMD_ATTACK_DOWN_LEFT:  _swing_at_target({-1,  1}); break;
     case CMD_ATTACK_DOWN:       _swing_at_target({ 0,  1}); break;
     case CMD_ATTACK_UP_RIGHT:   _swing_at_target({ 1, -1}); break;

@@ -21,7 +21,7 @@
 #include "AppHdr.h"
 
 #include "macro.h"
-
+#include <iostream>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
@@ -1878,13 +1878,12 @@ int get_macro_buf_size()
 
 void init_keybindings()
 {
-    int i;
 
+    int i;
     for (i = 0; _command_name_list[i].cmd != CMD_NO_CMD
                 && _command_name_list[i].name != nullptr; i++)
     {
         command_name &data = _command_name_list[i];
-
         ASSERT(VALID_BIND_COMMAND(data.cmd));
         ASSERT(!_names_to_cmds.count(data.name));
         ASSERT(_cmds_to_names.find(data.cmd)  == _cmds_to_names.end());
