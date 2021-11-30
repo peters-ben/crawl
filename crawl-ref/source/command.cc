@@ -1299,7 +1299,8 @@ static void _add_formatted_settings_menu(column_composer& cols)
 		"\nPress E to rebind SAVE AND EXIT"
 		"\nPress F to rebind AUTOFIGHT"
 		"\nPress G to rebind AUTO-EXPLORE"
-		"\nPress H to rebind SET WAYPOINT");
+		"\nPress H to rebind SET WAYPOINT"
+		"\n\nPress X to reset keybinds to default!");
 	_add_insert_commands(cols, 1, "\n\n\n\n\n\nCurrent binding: %", {CMD_MOVE_LEFT});
 	_add_insert_commands(cols, 1, "Current binding: %", {CMD_MOVE_RIGHT});
 	_add_insert_commands(cols, 1, "Current binding: %", {CMD_MOVE_UP});
@@ -1830,8 +1831,7 @@ private:
 		formatted_string header_text, settings_text;
 		switch (key)
 		{
-			case CK_ESCAPE: case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
-			return false;
+			case CK_ESCAPE: case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '\t':			return false;
 		default:
 			if (!(page = _get_settings_section(key, header_text, settings_text, scroll)))
 				break;
@@ -1930,7 +1930,10 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
                                 keyBinds[7] = bindString;
                 }
                   return true;
-
+	 case 'x': {
+			std::fill(keyBinds.begin(), keyBinds.end(), "");
+		   }
+		  return true;
 	
 	default:
 		return false;
@@ -1952,8 +1955,8 @@ void show_settings(int section, string highlight_string) {
 		file.close();
 	}
 	// if `section` is a special case, don't instantiate a help popup at all.
-	if (_show_settings_special(toalower(section), keyBinds))
-		return;
+//	if (_show_settings_special(toalower(section), keyBinds))
+//		return;
 	settings_popup settings(section);
 	settings.highlight = highlight_string;
 	int key = toalower(settings.show());

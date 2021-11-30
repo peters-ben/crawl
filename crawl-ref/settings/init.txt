@@ -68,6 +68,7 @@
 
 # Turn the shift-vi keys into safe move, instead of run.
 # include = safe_move_shift.txt
+  include = default_command_keys.txt
   include = settings_command_keys.txt
 ##### Ancient versions ##############################################
 # If you're used to the interface of ancient versions of Crawl, you may

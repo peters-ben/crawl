@@ -1,0 +1,8 @@
+bindkey = [h] CMD_MOVE_LEFT
+bindkey = [l] CMD_MOVE_RIGHT
+bindkey = [k] CMD_MOVE_UP
+bindkey = [j] CMD_MOVE_DOWN
+bindkey = [S] CMD_SAVE_GAME
+bindkey = [	] CMD_AUTOFIGHT
+bindkey = [o] CMD_EXPLORE
+bindkey = [^W] CMD_FIX_WAYPOINT
