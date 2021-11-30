@@ -1300,7 +1300,9 @@ static void _add_formatted_settings_menu(column_composer& cols)
 		"\nPress F to rebind AUTOFIGHT"
 		"\nPress G to rebind AUTO-EXPLORE"
 		"\nPress H to rebind SET WAYPOINT"
-		"\n\nPress X to reset keybinds to default!");
+		"\n\nValid Binds: [a-z], [0-9], Tab"
+		"\nPress X to reset keybinds to default!"
+		"\nPress Esc at any point to exit the menu!");
 	_add_insert_commands(cols, 1, "\n\n\n\n\n\nCurrent binding: %", {CMD_MOVE_LEFT});
 	_add_insert_commands(cols, 1, "Current binding: %", {CMD_MOVE_RIGHT});
 	_add_insert_commands(cols, 1, "Current binding: %", {CMD_MOVE_UP});
@@ -1314,7 +1316,7 @@ static void _add_formatted_settings_menu(column_composer& cols)
 
 }
 
-static void _add_formatted_keysettings(column_composer& cols)
+/*static void _add_formatted_keysettings(column_composer& cols)
 {
 	cols.add_formatted(
 		0,
@@ -1587,9 +1589,9 @@ static void _add_formatted_keysettings(column_composer& cols)
 	cols.add_formatted(
 		1, text,
 		false);
-}
+} */
 
-static void _add_formatted_hints_settings(column_composer& cols)
+/*static void _add_formatted_hints_settings(column_composer& cols)
 {
 	// First column.
 	cols.add_formatted(
@@ -1738,7 +1740,7 @@ static void _add_formatted_hints_settings(column_composer& cols)
 		"<w>f</w> or <w>p</w> : shoot at previous target\n"
 		"         if still alive and in sight\n",
 		false);
-}
+} */
 static int _get_settings_section(int section, formatted_string& header_out, formatted_string& text_out, int& scroll_out)
 {
 	static map<int, int> hotkeys;
@@ -1787,25 +1789,17 @@ static int _get_settings_section(int section, formatted_string& header_out, form
 	scroll_out = 0;
 	switch (section)
 	{
-	case '?':
-		if (crawl_state.game_is_hints_tutorial())
-			text_out = _col_conv(_add_formatted_hints_settings);
-		else
-			text_out = _col_conv(_add_formatted_keysettings);
-		return page;
 	case CK_HOME:
 		text_out = _col_conv(_add_formatted_settings_menu);
 		return page;
 	default:
-		if (hotkeys.count(section))
-			scroll_out = hotkeys[section];
 		if (page_text.count(page))
 		{
 			text_out = page_text[page];
 			return page;
 		}
 		break;
-	}
+	} 
 	return 0;
 }
 
@@ -1816,6 +1810,39 @@ public:
 		set_tag("help");
 		process_key(key);
 	};
+	bool process_key_value(int ch, bool allowEscape) {
+	 int key = toalower(ch);
+
+	#ifdef USE_TILE_LOCAL
+                const int line_height = tiles.get_crt_font()->char_height();
+	#else
+                const int line_height = 1;
+	#endif
+
+                int scroll, page;
+                formatted_string header_text, settings_text;
+                switch (key)
+                {
+			case CK_ESCAPE:
+				return allowEscape;
+                        case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8':  case '\t':  return true;
+
+		       	default:
+			if (!(page = _get_settings_section(key, header_text, settings_text, scroll)))
+                                break;
+                        if (page != prev_page)
+                        {
+                                contents = settings_text;
+                                m_contents_dirty = true;
+                                prev_page = page;
+                        }
+                        scroll = scroll ? (scroll - 2) * line_height : 0;
+                        set_scroll(scroll);
+
+				return false;
+		}
+		return false;
+	}
 private:
 	bool process_key(int ch) override
 	{
@@ -1831,8 +1858,9 @@ private:
 		formatted_string header_text, settings_text;
 		switch (key)
 		{
+			
 			case CK_ESCAPE: case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '\t':			return false;
-		default:
+			default:
 			if (!(page = _get_settings_section(key, header_text, settings_text, scroll)))
 				break;
 			if (page != prev_page)
@@ -1847,7 +1875,7 @@ private:
 		}
 
 		return formatted_scroller::process_key(ch);
-	};
+	}; 
 	int prev_page{ 0 };
 };
 
@@ -1857,84 +1885,123 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 	{
 	case 'a': {
 			settings_popup settings(CK_HOME);
-			std::string bindString = "bindkey = [";
-			bindString += char(toalower(settings.show()));
-		        bindString +=	"] CMD_MOVE_LEFT";
-                        if(bindString.compare(keyBinds[0]) != 0)
-				keyBinds[0] = bindString;
-                }
+			int newKey = toalower(settings.show());
+			bool value = settings.process_key_value(newKey, false);
+			if(value) {
+				std::string bindString = "bindkey = [";
+				bindString += char(newKey);
+		        	bindString +=	"] CMD_MOVE_LEFT";
+                        	if(bindString.compare(keyBinds[0]) != 0)
+					keyBinds[0] = bindString;
+                } else
+			return false;
+		  }
                 return true;
 	 case 'b': {
-            		 settings_popup settings(CK_HOME);
-                        std::string bindString = "bindkey = [";
-                        bindString += char(toalower(settings.show()));
-                        bindString +=   "] CMD_MOVE_RIGHT";
-                        if(bindString.compare(keyBinds[1]) != 0)
-                                keyBinds[1] = bindString;
-                }
+   			settings_popup settings(CK_HOME);
+		  	int newKey = toalower(settings.show());
+   			bool value = settings.process_key_value(newKey, false);
+      			if(value) {
+                        	std::string bindString = "bindkey = [";
+                        	bindString += char(newKey);
+                        	bindString +=   "] CMD_MOVE_RIGHT";
+                        	if(bindString.compare(keyBinds[1]) != 0)
+                                	keyBinds[1] = bindString;
+                	} else
+				return false;
+		   }
                 return true;
 	 case 'c': {
-                	 settings_popup settings(CK_HOME);
-                        std::string bindString = "bindkey = [";
-                        bindString += char(toalower(settings.show()));
-                        bindString +=   "] CMD_MOVE_UP";
-                        if(bindString.compare(keyBinds[2]) != 0)
-                                keyBinds[2] = bindString;
-                }
+                	settings_popup settings(CK_HOME);
+			int newKey = toalower(settings.show());
+			bool value = settings.process_key_value(newKey, false);
+			if(value) {
+                        	std::string bindString = "bindkey = [";
+                        	bindString += char(newKey);
+                        	bindString +=   "] CMD_MOVE_UP";
+                        	if(bindString.compare(keyBinds[2]) != 0)
+                                	keyBinds[2] = bindString;
+                	} else
+				return false;
+		}
                 return true;
 	case 'd': {
 			settings_popup settings(CK_HOME);
-                        std::string bindString = "bindkey = [";
-                        bindString += char(toalower(settings.show()));
-                        bindString +=   "] CMD_MOVE_DOWN";
-                        if(bindString.compare(keyBinds[3]) != 0)
-                                keyBinds[3] = bindString;
+			int newKey = toalower(settings.show());
+			bool value = settings.process_key_value(newKey, false);
+			if(value) {
+                        	std::string bindString = "bindkey = [";
+                        	bindString += char(newKey);
+                        	bindString +=   "] CMD_MOVE_DOWN";
+                        	if(bindString.compare(keyBinds[3]) != 0)
+                                	keyBinds[3] = bindString;
+			} else
+				return false;
 		}
                   return true;
 	 case 'e': {
 			settings_popup settings(CK_HOME);
-                        std::string bindString = "bindkey = [";
-                        bindString += char(toalower(settings.show()));
-                        bindString +=   "] CMD_SAVE_GAME";
-                        if(bindString.compare(keyBinds[4]) != 0)
-                                keyBinds[4] = bindString;
+			int newKey = toalower(settings.show());
+			bool value = settings.process_key_value(newKey, false);
+			if(value) {
+                        	std::string bindString = "bindkey = [";
+                       		bindString += char(newKey);
+                       		bindString +=   "] CMD_SAVE_GAME";
+                        	if(bindString.compare(keyBinds[4]) != 0)
+                                	keyBinds[4] = bindString;
+			} else
+				return false;
                 }
                   return true;
 
 	 case 'f': {
 		   	settings_popup settings(CK_HOME);
-                        std::string bindString = "bindkey = [";
-                        bindString += char(toalower(settings.show()));
-                        bindString +=   "] CMD_AUTOFIGHT";
-                        if(bindString.compare(keyBinds[5]) != 0)
-                                keyBinds[5] = bindString;
+			int newKey = toalower(settings.show());
+			bool value = settings.process_key_value(newKey, false);
+			if(value) {
+                        	std::string bindString = "bindkey = [";
+                        	bindString += char(newKey);
+                        	bindString +=   "] CMD_AUTOFIGHT";
+                        	if(bindString.compare(keyBinds[5]) != 0)
+                                	keyBinds[5] = bindString;
+			} else
+				return false;
                 }
                   return true;
 
 	 case 'g': {
   		   	settings_popup settings(CK_HOME);
-                        std::string bindString = "bindkey = [";
-                        bindString += char(toalower(settings.show()));
-                        bindString +=   "] CMD_EXPLORE";
-                        if(bindString.compare(keyBinds[6]) != 0)
-                                keyBinds[6] = bindString;
+			int newKey = toalower(settings.show());
+			bool value = settings.process_key_value(newKey, false);
+			if(value) {
+                        	std::string bindString = "bindkey = [";
+                        	bindString += char(newKey);
+                        	bindString +=   "] CMD_EXPLORE";
+                        	if(bindString.compare(keyBinds[6]) != 0)
+                                	keyBinds[6] = bindString;
+			} else
+				return false;
                 }
                   return true;
 
 	 case 'h': {
 			settings_popup settings(CK_HOME);
-                        std::string bindString = "bindkey = [";
-                        bindString += char(toalower(settings.show()));
-                        bindString +=   "] CMD_FIX_WAYPOINT";
-                        if(bindString.compare(keyBinds[7]) != 0)
-                                keyBinds[7] = bindString;
+			int newKey = toalower(settings.show());
+			bool value = settings.process_key_value(newKey, false);
+			if(value) {
+                        	std::string bindString = "bindkey = [";
+                        	bindString += char(newKey);
+                        	bindString +=   "] CMD_FIX_WAYPOINT";
+                        	if(bindString.compare(keyBinds[7]) != 0)
+                                	keyBinds[7] = bindString;
+			} else
+				return false;
                 }
                   return true;
 	 case 'x': {
 			std::fill(keyBinds.begin(), keyBinds.end(), "");
 		   }
 		  return true;
-	
 	default:
 		return false;
 	}
@@ -1944,27 +2011,29 @@ void show_settings(int section, string highlight_string) {
 	std::vector <string> keyBinds = {"", "", "", "", "", "", "", ""};
 	int index = 0;
 	std::string line;
-	std::ifstream file ("/u/zon-d2/ugrad/bspe227/crawl/crawl-ref/settings/settings_command_keys.txt");
-	if(!file)
+	std::ifstream in_file ("/u/zon-d2/ugrad/bspe227/crawl/crawl-ref/settings/settings_command_keys.txt");
+	if(!in_file)
         	std::cerr << "Could not open file!" << std::endl;
         else {
-		while(std::getline(file, line)) {
+		while(std::getline(in_file, line)) {
 			keyBinds[index] = line;
 			index++;
 		}
-		file.close();
+		in_file.close();
 	}
-	// if `section` is a special case, don't instantiate a help popup at all.
-//	if (_show_settings_special(toalower(section), keyBinds))
-//		return;
 	settings_popup settings(section);
 	settings.highlight = highlight_string;
 	int key = toalower(settings.show());
-	// handle the case where one of the special case help sections is triggered
-	// from the help main menu.
-	_show_settings_special(key, keyBinds);
+	bool value = settings.process_key_value(key, true);
+	if(value) {
+		_show_settings_special(key, keyBinds);
+	}
 	std::ofstream out_file("/u/zon-d2/ugrad/bspe227/crawl/crawl-ref/settings/settings_command_keys.txt");
-	for(const auto &item : keyBinds)
-		out_file << item << std::endl;
-	out_file.close();
+	if(!out_file)
+		std::cerr << "Could not write to file!" << std::endl;
+	else {
+		for(const auto &item : keyBinds)
+			out_file << item << std::endl;
+		out_file.close();
+	}
 }
