@@ -1,8 +1,1 @@
-bindkey = [a] CMD_MOVE_LEFT
-
-
-
-
-
-
 
