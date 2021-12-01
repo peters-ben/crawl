@@ -14,7 +14,7 @@
 {CK_DELETE, CMD_WAIT}, // numpad . on some keyboards on sdl??
 #endif
 {'.', CMD_WAIT},
-{' ', CMD_SETTINGS_MENU},
+{ESCAPE, CMD_SETTINGS_MENU},
 {CK_END, CMD_MOVE_DOWN_LEFT},
 {CK_LEFT, CMD_MOVE_LEFT},
 {CK_DOWN, CMD_MOVE_DOWN},
