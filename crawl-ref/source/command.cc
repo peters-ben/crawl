@@ -1285,23 +1285,25 @@ void show_help(int section, string highlight_string)
 
 
 // SETTINGS STUFF CS 498
+static std::map<command_type, int> defaultKeyBinds = {{CMD_MOVE_LEFT, 'h'}, {CMD_MOVE_RIGHT, 'l'}, {CMD_MOVE_UP, 'k'}, {CMD_MOVE_DOWN, 'j'}, {CMD_SAVE_GAME, 'S'},
+       	{CMD_AUTOFIGHT, '\t'}, {CMD_EXPLORE, 'o'}, {CMD_FIX_WAYPOINT, CONTROL('W')}};
+
+bool areKeyBindsDefault() {
+	bool isDefault = true;
+	for (auto const& item : defaultKeyBinds) {
+		if(command_to_key(item.first) != item.second) {
+			isDefault = false;
+			break;
+		}
+	}
+	return isDefault;
+
+}
 static void _add_formatted_settings_menu(column_composer& cols)
 {
 	std::string line;	
 	std::string home = getenv("HOME");
-	bool empty = true;
-	std::ifstream in_file (home + "/crawl/crawl-ref/settings/settings_command_keys.txt");
-        if(!in_file)
-                std::cerr << "Could not open file!" << std::endl;
-        else {
-                while(std::getline(in_file, line)) {
-                        if(line.compare("") != 0) {
-				empty = false;
-				break;
-			}
-                }
-                in_file.close();
-        }
+	bool defaultKeys = areKeyBindsDefault();
 
 
 	cols.add_formatted(
@@ -1318,7 +1320,7 @@ static void _add_formatted_settings_menu(column_composer& cols)
 		"\nPress G to rebind AUTO-EXPLORE"
 		"\nPress H to rebind SET WAYPOINT"
 		"\n\nValid Binds: [a-z], [0-9], Tab");
-	if(!empty)
+	if(!defaultKeys)
 		cols.add_formatted(0,
 		"\nPress X to reset keybinds to default!");
 	cols.add_formatted(0,
@@ -1472,8 +1474,7 @@ private:
 	}; 
 	int prev_page{ 0 };
 }; 
-
-static bool _show_settings_special(int key, std::vector <string> &keyBinds)
+static bool _show_settings_special(int key)
 {
 	switch (key)
 	{
@@ -1482,11 +1483,8 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
-				std::string bindString = "bindkey = [";
-				bindString += char(newKey);
-		        	bindString +=	"] CMD_MOVE_LEFT";
-                        	if(bindString.compare(keyBinds[0]) != 0)
-					keyBinds[0] = bindString;
+			       	unbind_command_to_key(CMD_MOVE_LEFT);	
+				bind_command_to_key(CMD_MOVE_LEFT, newKey);
                 } else
 			return false;
 		  }
@@ -1496,11 +1494,8 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 		  	int newKey = settings.show();
    			bool value = settings.process_key_value(newKey, false);
       			if(value) {
-                        	std::string bindString = "bindkey = [";
-                        	bindString += char(newKey);
-                        	bindString +=   "] CMD_MOVE_RIGHT";
-                        	if(bindString.compare(keyBinds[1]) != 0)
-                                	keyBinds[1] = bindString;
+				unbind_command_to_key(CMD_MOVE_RIGHT);
+				bind_command_to_key(CMD_MOVE_RIGHT, newKey);
                 	} else
 				return false;
 		   }
@@ -1510,11 +1505,8 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 			int newKey = toalower(settings.show());
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
-                        	std::string bindString = "bindkey = [";
-                        	bindString += char(newKey);
-                        	bindString +=   "] CMD_MOVE_UP";
-                        	if(bindString.compare(keyBinds[2]) != 0)
-                                	keyBinds[2] = bindString;
+                      		unbind_command_to_key(CMD_MOVE_UP);
+				bind_command_to_key(CMD_MOVE_UP, newKey);
                 	} else
 				return false;
 		}
@@ -1524,11 +1516,8 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
-                        	std::string bindString = "bindkey = [";
-                        	bindString += char(newKey);
-                        	bindString +=   "] CMD_MOVE_DOWN";
-                        	if(bindString.compare(keyBinds[3]) != 0)
-                                	keyBinds[3] = bindString;
+				unbind_command_to_key(CMD_MOVE_DOWN);
+				bind_command_to_key(CMD_MOVE_DOWN, newKey);
 			} else
 				return false;
 		}
@@ -1538,11 +1527,9 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
-                        	std::string bindString = "bindkey = [";
-                       		bindString += char(newKey);
-                       		bindString +=   "] CMD_SAVE_GAME";
-                        	if(bindString.compare(keyBinds[4]) != 0)
-                                	keyBinds[4] = bindString;
+				unbind_command_to_key(CMD_SAVE_GAME);
+				bind_command_to_key(CMD_SAVE_GAME, newKey);
+
 			} else
 				return false;
                 }
@@ -1553,11 +1540,8 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
-                        	std::string bindString = "bindkey = [";
-                        	bindString += char(newKey);
-                        	bindString +=   "] CMD_AUTOFIGHT";
-                        	if(bindString.compare(keyBinds[5]) != 0)
-                                	keyBinds[5] = bindString;
+				unbind_command_to_key(CMD_AUTOFIGHT);
+				bind_command_to_key(CMD_AUTOFIGHT, newKey);
 			} else
 				return false;
                 }
@@ -1568,11 +1552,8 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
-                        	std::string bindString = "bindkey = [";
-                        	bindString += char(newKey);
-                        	bindString +=   "] CMD_EXPLORE";
-                        	if(bindString.compare(keyBinds[6]) != 0)
-                                	keyBinds[6] = bindString;
+				unbind_command_to_key(CMD_EXPLORE);
+				bind_command_to_key(CMD_EXPLORE, newKey);
 			} else
 				return false;
                 }
@@ -1583,17 +1564,15 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
-                        	std::string bindString = "bindkey = [";
-                        	bindString += char(newKey);
-                        	bindString +=   "] CMD_FIX_WAYPOINT";
-                        	if(bindString.compare(keyBinds[7]) != 0)
-                                	keyBinds[7] = bindString;
+				unbind_command_to_key(CMD_FIX_WAYPOINT);
+				bind_command_to_key(CMD_FIX_WAYPOINT, newKey);
+
 			} else
 				return false;
                 }
                   return true;
 	 case 'x': {
-			std::fill(keyBinds.begin(), keyBinds.end(), "");
+			resetKeyBinds();
 		   }
 		  return true;
 	default:
@@ -1601,34 +1580,19 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 	}
 }
 
-void show_settings(int section, string highlight_string) {
-	std::vector <string> keyBinds = {"", "", "", "", "", "", "", ""};
-	int index = 0;
-	std::string line;
-	std::string home = getenv("HOME");
-	std::ifstream in_file (home + "/crawl/crawl-ref/settings/settings_command_keys.txt");
-	if(!in_file)
-        	std::cerr << "Could not open file!" << std::endl;
-        else {
-		while(std::getline(in_file, line)) {
-			keyBinds[index] = line;
-			index++;
-		}
-		in_file.close();
+void resetKeyBinds() {
+	for (auto const& item : defaultKeyBinds) {
+		unbind_command_to_key(item.first);
+		bind_command_to_key(item.first, item.second);
 	}
+}
+
+void show_settings(int section, string highlight_string) {
 	settings_popup settings(section);
 	settings.highlight = highlight_string;
 	int key = toalower(settings.show());
 	bool value = settings.process_key_value(key, true);
 	if(value) {
-		_show_settings_special(key, keyBinds);
-	}
-	std::ofstream out_file(home + "/crawl/crawl-ref/settings/settings_command_keys.txt");
-	if(!out_file)
-		std::cerr << "Could not write to file!" << std::endl;
-	else {
-		for(const auto &item : keyBinds)
-			out_file << item << std::endl;
-		out_file.close();
+		_show_settings_special(key);
 	}
 }

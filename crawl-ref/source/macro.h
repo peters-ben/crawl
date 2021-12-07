@@ -123,6 +123,8 @@ KeymapContext context_for_command(command_type cmd);
 
 void bind_command_to_key(command_type cmd, int key);
 
+void unbind_command_to_key(command_type cmd);
+
 string command_to_string(command_type cmd, bool tutorial = false);
 void insert_commands(string &desc, const vector<command_type> &cmds,
                      bool formatted = true);

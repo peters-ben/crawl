@@ -2035,6 +2035,15 @@ void bind_command_to_key(command_type cmd, int key)
     cmd_map[cmd] = key;
 }
 
+void unbind_command_to_key(command_type cmd) {
+	KeymapContext context = context_for_command(cmd);
+	key_to_cmd_map &key_map = _keys_to_cmds[context];
+	cmd_to_key_map &cmd_map = _cmds_to_keys[context];
+	int key = command_to_key(cmd);
+	key_map.erase(key);
+	cmd_map.erase(cmd);
+} 
+
 string command_to_string(command_type cmd, bool tutorial)
 {
     const int key = command_to_key(cmd);
