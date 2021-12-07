@@ -1419,7 +1419,7 @@ public:
                 {
 			case CK_ESCAPE:
 				return allowEscape;
-                        case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8':  case '\t':  return true;
+			case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8':  case '\t':  return true;
 
 		       	default:
 			if (!(page = _get_settings_section(key, header_text, settings_text, scroll)))
@@ -1436,7 +1436,7 @@ public:
 				return false;
 		}
 		return false;
-	}
+	} 
 private:
 	bool process_key(int ch) override
 	{
@@ -1471,7 +1471,7 @@ private:
 		return formatted_scroller::process_key(ch);
 	}; 
 	int prev_page{ 0 };
-};
+}; 
 
 static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 {
@@ -1479,7 +1479,7 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 	{
 	case 'a': {
 			settings_popup settings(CK_HOME);
-			int newKey = toalower(settings.show());
+			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
 				std::string bindString = "bindkey = [";
@@ -1493,7 +1493,7 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
                 return true;
 	 case 'b': {
    			settings_popup settings(CK_HOME);
-		  	int newKey = toalower(settings.show());
+		  	int newKey = settings.show();
    			bool value = settings.process_key_value(newKey, false);
       			if(value) {
                         	std::string bindString = "bindkey = [";
@@ -1521,7 +1521,7 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
                 return true;
 	case 'd': {
 			settings_popup settings(CK_HOME);
-			int newKey = toalower(settings.show());
+			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
                         	std::string bindString = "bindkey = [";
@@ -1535,7 +1535,7 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
                   return true;
 	 case 'e': {
 			settings_popup settings(CK_HOME);
-			int newKey = toalower(settings.show());
+			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
                         	std::string bindString = "bindkey = [";
@@ -1550,7 +1550,7 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 
 	 case 'f': {
 		   	settings_popup settings(CK_HOME);
-			int newKey = toalower(settings.show());
+			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
                         	std::string bindString = "bindkey = [";
@@ -1565,7 +1565,7 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 
 	 case 'g': {
   		   	settings_popup settings(CK_HOME);
-			int newKey = toalower(settings.show());
+			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
                         	std::string bindString = "bindkey = [";
@@ -1580,7 +1580,7 @@ static bool _show_settings_special(int key, std::vector <string> &keyBinds)
 
 	 case 'h': {
 			settings_popup settings(CK_HOME);
-			int newKey = toalower(settings.show());
+			int newKey = settings.show();
 			bool value = settings.process_key_value(newKey, false);
 			if(value) {
                         	std::string bindString = "bindkey = [";
