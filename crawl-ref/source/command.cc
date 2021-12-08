@@ -1284,7 +1284,7 @@ void show_help(int section, string highlight_string)
 }
 
 
-// SETTINGS STUFF CS 498
+// SETTINGS MENU CS 498
 static std::map<command_type, int> defaultKeyBinds = {{CMD_MOVE_LEFT, 'h'}, {CMD_MOVE_RIGHT, 'l'}, {CMD_MOVE_UP, 'k'}, {CMD_MOVE_DOWN, 'j'}, {CMD_SAVE_GAME, 'S'},
        	{CMD_AUTOFIGHT, '\t'}, {CMD_EXPLORE, 'o'}, {CMD_FIX_WAYPOINT, CONTROL('W')}};
 
@@ -1299,6 +1299,9 @@ bool areKeyBindsDefault() {
 	return isDefault;
 
 }
+
+bool invalid = false;
+
 static void _add_formatted_settings_menu(column_composer& cols)
 {
 	std::string line;	
@@ -1319,7 +1322,7 @@ static void _add_formatted_settings_menu(column_composer& cols)
 		"\nPress F to rebind AUTOFIGHT"
 		"\nPress G to rebind AUTO-EXPLORE"
 		"\nPress H to rebind SET WAYPOINT"
-		"\n\nValid Binds: [a-z], [0-9], Tab");
+		"\n\nValid Binds: [a-z], [A-Z], [0-9], Tab");
 	if(!defaultKeys)
 		cols.add_formatted(0,
 		"\nPress X to reset keybinds to default!");
@@ -1333,7 +1336,9 @@ static void _add_formatted_settings_menu(column_composer& cols)
 	_add_insert_commands(cols, 1, "Current binding: % ", {CMD_AUTOFIGHT});
 	_add_insert_commands(cols, 1, "Current binding: % ", {CMD_EXPLORE});
 	_add_insert_commands(cols, 1, "Current binding: % ", {CMD_FIX_WAYPOINT});
-
+	if(invalid)
+		cols.add_formatted(0,
+		"\nInvalid keybind! Try again!");
 
 
 }
@@ -1389,12 +1394,9 @@ static int _get_settings_section(int section, formatted_string& header_out, form
 		text_out = _col_conv(_add_formatted_settings_menu);
 		return page;
 	default:
-		if (page_text.count(page))
-		{
-			text_out = page_text[page];
-			return page;
-		}
-		break;
+		invalid = true;
+		text_out = _col_conv(_add_formatted_settings_menu);
+		return page;
 	} 
 	return 0;
 }
@@ -1421,9 +1423,8 @@ public:
                 {
 			case CK_ESCAPE:
 				return allowEscape;
-			case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8':  case '\t':  return true;
-
-		       	default:
+			case CONTROL('a'): case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8':  case '\t':  invalid = false; return true;			default:
+			invalid = true;
 			if (!(page = _get_settings_section(key, header_text, settings_text, scroll)))
                                 break;
                         if (page != prev_page)
@@ -1454,8 +1455,7 @@ private:
 		formatted_string header_text, settings_text;
 		switch (key)
 		{
-			
-			case CK_ESCAPE: case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '\t':			return false;
+			case CONTROL('a'): case CK_ESCAPE:  case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':  case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8':  case '\t':  return false;
 			default:
 			if (!(page = _get_settings_section(key, header_text, settings_text, scroll)))
 				break;
@@ -1576,6 +1576,7 @@ static bool _show_settings_special(int key)
 		   }
 		  return true;
 	default:
+		invalid = true;
 		return false;
 	}
 }
@@ -1588,6 +1589,7 @@ void resetKeyBinds() {
 }
 
 void show_settings(int section, string highlight_string) {
+	invalid = false;
 	settings_popup settings(section);
 	settings.highlight = highlight_string;
 	int key = toalower(settings.show());
